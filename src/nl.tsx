@@ -3,21 +3,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import fetch, { AbortError, FormData } from "node-fetch";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const { state, translation } = useTranslation();
 
   return (
     <List
       isLoading={ state.isLoading }
-      onSearchTextChange={ search }
+      onSearchTextChange={ translation }
       searchBarPlaceholder="Translate to Dutch using DeepL…"
       throttle
     >
-      <SearchListItem translationResult={ state.result }/>
+      <TranslationListItem translationResult={ state.result }/>
     </List>
   );
 }
 
-function SearchListItem({ translationResult }: { translationResult: TranslationResult | null }) {
+function TranslationListItem({ translationResult }: { translationResult: TranslationResult | null }) {
   if (translationResult == null) return null;
 
   return (
@@ -38,12 +38,12 @@ function SearchListItem({ translationResult }: { translationResult: TranslationR
   );
 }
 
-function useSearch() {
+function useTranslation() {
   const [state, setState] = useState<TranslationState>({ result: null, isLoading: true });
   const cancelRef = useRef<AbortController | null>(null);
 
-  const search = useCallback(
-    async function search(searchText: string) {
+  const translation = useCallback(
+    async function translate(text: string) {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
       setState((oldState) => ({
@@ -51,7 +51,7 @@ function useSearch() {
         isLoading: true,
       }));
       try {
-        const result = await performTranslation(searchText, cancelRef.current.signal);
+        const result = await performTranslation(text, cancelRef.current.signal);
         setState((oldState) => ({
           ...oldState,
           result: result,
@@ -67,15 +67,15 @@ function useSearch() {
           return;
         }
 
-        console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+        console.error("translation error", error);
+        showToast({ style: Toast.Style.Failure, title: "Could not perform translation", message: String(error) });
       }
     },
     [cancelRef, setState]
   );
 
   useEffect(() => {
-    search("");
+    translation("");
     return () => {
       cancelRef.current?.abort();
     };
@@ -83,7 +83,7 @@ function useSearch() {
 
   return {
     state: state,
-    search: search,
+    translation: translation,
   };
 }
 
