@@ -1,17 +1,73 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "typeahead-search",
-  "title": "Typeahead Search",
-  "description": "",
+  "name": "deepl",
+  "title": "DeepL",
+  "description": "Get translations using DeepL",
   "icon": "command-icon.png",
   "author": "pindab0ter",
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Show Typeahead Results",
-      "description": "Template for showing typeahead search with network results.",
-      "mode": "view"
+      "name": "nl",
+      "title": "Translate to Dutch",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Dutch.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "formality",
+          "type": "dropdown",
+          "title": "Formality",
+          "required": true,
+          "description": "What formality to prefer for this language.",
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Formal",
+              "value": "formal"
+            },
+            {
+              "title": "Informal",
+              "value": "informal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "plan",
+      "type": "dropdown",
+      "title": "Subscription Plan",
+      "description": "Whether you are on a paid plan or not.",
+      "required": true,
+      "default": "free",
+      "data": [
+        {
+          "title": "Free",
+          "value": "free"
+        },
+        {
+          "title": "Pro",
+          "value": "pro"
+        }
+      ]
+    },
+    {
+      "name": "apikey",
+      "type": "password",
+      "title": "API Key",
+      "required": true,
+      "placeholder": "Your DeepL API key",
+      "description": "DeepL API key. Find this in your account details."
     }
   ],
   "dependencies": {
