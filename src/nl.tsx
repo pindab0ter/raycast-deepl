@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import fetch, { AbortError, FormData } from "node-fetch";
 
 export default function Command() {
+  // TODO: Move everything not language specific into shared files
   const { state, translation } = useTranslation();
 
   const usage = state.result?.usage
@@ -19,6 +20,7 @@ export default function Command() {
     subtitle = "";
   }
 
+  // TODO: Replace with detail view: https://developers.raycast.com/api-reference/user-interface/detail
   return (
     <List
       isLoading={ state.isLoading }
@@ -111,8 +113,10 @@ async function performTranslation(text: string, signal: AbortSignal): Promise<Tr
   const translationFormData = new FormData();
   translationFormData.append("auth_key", preferences.apikey);
   translationFormData.append("text", text);
+  // TODO: Write script to fill package.json and generate .tsx files with available languages: https://www.deepl.com/docs-api/other-functions/listing-supported-languages/
   translationFormData.append("target_lang", "NL");
 
+  // TODO: use api/api-free depending on subscription
   const translationResponse = await fetch("https://api-free.deepl.com/v2/translate", {
     method: "post",
     signal: signal,
@@ -137,6 +141,7 @@ async function performTranslation(text: string, signal: AbortSignal): Promise<Tr
   const usageFormData = new FormData();
   usageFormData.append("auth_key", preferences.apikey);
 
+  // TODO: use api/api-free depending on subscription
   // Fetch after getting translation result to get up-to-date usage info
   const usageResponse = await fetch("https://api-free.deepl.com/v2/usage", {
     method: "post",
