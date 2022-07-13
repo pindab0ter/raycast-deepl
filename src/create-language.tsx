@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { Language, useTranslation } from "./lib/deeplapi";
-import { TranslationListItem } from "./components/translation_list_item";
+import { TranslationListItem } from "./components/translation-list-item";
 
 export default function command(target: Language): () => JSX.Element {
   return (): JSX.Element => {
