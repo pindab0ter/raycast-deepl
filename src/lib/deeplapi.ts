@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import fetch, { AbortError, FormData } from "node-fetch";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-export function useTranslation() {
+export function useTranslation(target: Language) {
   const [state, setState] = useState<TranslationState>({ result: null, isLoading: true });
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -15,7 +15,7 @@ export function useTranslation() {
         isLoading: true,
       }));
       try {
-        const result = await performTranslation(text, abortControllerRef.current.signal);
+        const result = await performTranslation(text, target, abortControllerRef.current.signal);
         setState((oldState) => ({
           ...oldState,
           result: result,
@@ -55,7 +55,12 @@ export function useTranslation() {
   };
 }
 
-async function performTranslation(text: string, signal: AbortSignal): Promise<TranslationResult | null> {
+async function performTranslation(
+  text: string,
+  target: Language,
+  signal: AbortSignal
+): Promise<TranslationResult | null> {
+
   if (text.length === 0) return null;
 
   const preferences = getPreferenceValues();
@@ -65,7 +70,7 @@ async function performTranslation(text: string, signal: AbortSignal): Promise<Tr
   translationFormData.append("text", text);
   // TODO: Write script to fill package.json and generate .tsx files with available languages:
   //  https://www.deepl.com/docs-api/other-functions/listing-supported-languages/
-  translationFormData.append("target_lang", "NL");
+  translationFormData.append("target_lang", target.code);
 
   // TODO: use api/api-free depending on subscription
   const translationResponse = await fetch("https://api-free.deepl.com/v2/translate", {
@@ -119,6 +124,11 @@ async function performTranslation(text: string, signal: AbortSignal): Promise<Tr
     text: translationResult.text,
     usage: usageResult
   };
+}
+
+export interface Language {
+  name: string,
+  code: string
 }
 
 export interface TranslationState {
