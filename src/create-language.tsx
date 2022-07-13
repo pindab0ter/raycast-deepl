@@ -11,12 +11,12 @@ export default function command(target: Language): () => JSX.Element {
     // TODO: Only show usage when on Free plan
     let subtitle: string;
     if (usage != null) {
-      const usagePercentage = Number(usage.characterCount / usage.characterLimit)
+      const usagePercentage = Number(usage.character_count / usage.character_limit)
         .toLocaleString(undefined, {
           style: "percent",
           maximumFractionDigits: 2
         })
-      subtitle = `${ usage.characterCount }/${ usage.characterLimit } characters used (${ usagePercentage })`;
+      subtitle = `${ usage.character_count }/${ usage.character_limit } characters used (${ usagePercentage })`;
     } else {
       subtitle = "";
     }
@@ -29,7 +29,7 @@ export default function command(target: Language): () => JSX.Element {
         throttle
       >
         <List.Section title={ `Translated from ${ target.name }` } subtitle={ subtitle }>
-          <TranslationListItem translationResult={ state.result }/>
+          <TranslationListItem result={ state.result }/>
         </List.Section>
       </List>
     );

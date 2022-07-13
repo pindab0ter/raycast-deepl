@@ -36,14 +36,14 @@ export function useTranslation(target: Language) {
           style: Toast.Style.Failure,
           title: "Could not perform translation",
           message: String(error)
-        });
+        }).then();
       }
     },
     [abortControllerRef, setState]
   );
 
   useEffect(() => {
-    translation("");
+    translation("").then();
     return () => {
       abortControllerRef.current?.abort();
     };
@@ -59,90 +59,92 @@ async function performTranslation(
   text: string,
   target: Language,
   signal: AbortSignal
-): Promise<TranslationResult | null> {
+): Promise<{ translation: Translation; usage: Usage | null } | null> {
 
   if (text.length === 0) return null;
 
   const preferences = getPreferenceValues();
 
-  const translationFormData = new FormData();
-  translationFormData.append("auth_key", preferences.apikey);
-  translationFormData.append("text", text);
-  // TODO: Write script to fill package.json and generate .tsx files with available languages:
-  //  https://www.deepl.com/docs-api/other-functions/listing-supported-languages/
-  translationFormData.append("target_lang", target.code);
+  const formData = new FormData();
+  formData.append("auth_key", preferences.apikey);
+  formData.append("text", text);
+  formData.append("target_lang", target.code);
 
-  // TODO: use api/api-free depending on subscription
-  const translationResponse = await fetch("https://api-free.deepl.com/v2/translate", {
+  const response = await fetch(apiUrlFor("translate"), {
     method: "post",
     signal: signal,
-    body: translationFormData
+    body: formData
   });
 
-  const translationJson = (await translationResponse.json()) as
+  const json = await response.json() as
     | {
-        translations: {
-          detected_source_language: string,
-          text: string,
-        }[];
+        translations: Translation[];
       }
     | { message: string };
 
-  if (!translationResponse.ok || "message" in translationJson) {
-    throw new Error("message" in translationJson ? translationJson.message : translationResponse.statusText);
+  if (!response.ok || "message" in json) {
+    throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  const translationResult = translationJson.translations[0];
-
-  const usageFormData = new FormData();
-  usageFormData.append("auth_key", preferences.apikey);
-
-  // TODO: use api/api-free depending on subscription
-  // Fetch after getting translation result to get up-to-date usage info
-  const usageResponse = await fetch("https://api-free.deepl.com/v2/usage", {
-    method: "post",
-    signal: signal,
-    body: usageFormData
-  });
-
-  const usageJson = (await usageResponse.json()) as
-    | {
-        character_count: number,
-        character_limit: number
-      }
-    | { message: string };
-
-  const usageResult = !usageResponse.ok || "message" in usageJson
-    ? null
-    : {
-      characterCount: usageJson.character_count,
-      characterLimit: usageJson.character_limit
-    }
+  const translation = json.translations[0];
+  const usage = await getUsage(signal);
 
   return {
-    detectedSourceLanguage: translationResult.detected_source_language,
-    text: translationResult.text,
-    usage: usageResult
+    translation: translation,
+    usage: usage
   };
 }
 
-export interface Language {
+export async function getUsage(signal: AbortSignal | null = null): Promise<Usage | null> {
+  const preferences = getPreferenceValues();
+
+  const formData = new FormData();
+  formData.append("auth_key", preferences.apikey);
+
+  // Fetch after getting translation result to get up-to-date usage info
+  const response = await fetch(apiUrlFor("usage"), {
+    method: "post",
+    signal: signal,
+    body: formData
+  });
+
+  const json = await response.json() as Usage | ErrorResponse;
+
+  return !response.ok || "message" in json
+    ? null
+    : json;
+}
+
+function apiUrlFor(endpoint: Endpoint): string {
+  const baseUrl = getPreferenceValues().plan == "free"
+    ? "https://api-free.deepl.com/v2/"
+    : "https://api.deepl.com/v2/";
+
+  return baseUrl + endpoint;
+}
+
+type Endpoint = "translate" | "usage" | "languages";
+
+export type Language = {
   name: string,
   code: string
 }
 
-export interface TranslationState {
-  result: TranslationResult | null;
+export type ErrorResponse = {
+  message: string
+}
+
+export type TranslationState = {
+  result: { translation: Translation, usage: Usage | null } | null;
   isLoading: boolean;
 }
 
-export interface TranslationResult {
+export type Usage = {
+  character_count: number,
+  character_limit: number
+}
+
+export type Translation = {
   text: string,
-  detectedSourceLanguage: string,
-  usage:
-    | {
-        characterCount: number,
-        characterLimit: number
-      }
-    | null
+  detected_source_language: string,
 }
