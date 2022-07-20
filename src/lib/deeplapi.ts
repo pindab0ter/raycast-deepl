@@ -115,6 +115,39 @@ export async function getUsage(signal: AbortSignal | null = null): Promise<Usage
     : json;
 }
 
+export const languages = [
+  { code: "BG", name: "Bulgarian" },
+  { code: "CS", name: "Czech" },
+  { code: "DA", name: "Danish" },
+  { code: "DE", name: "German" },
+  { code: "EL", name: "Greek" },
+  { code: "EN", name: "English" },
+  { code: "EN-GB", name: "English (British)" },
+  { code: "EN-US", name: "English (American)" },
+  { code: "ES", name: "Spanish" },
+  { code: "ET", name: "Estonian" },
+  { code: "FI", name: "Finnish" },
+  { code: "FR", name: "French" },
+  { code: "HU", name: "Hungarian" },
+  { code: "ID", name: "Indonesian" },
+  { code: "IT", name: "Italian" },
+  { code: "JA", name: "Japanese" },
+  { code: "LT", name: "Lithuanian" },
+  { code: "LV", name: "Latvian" },
+  { code: "NL", name: "Dutch" },
+  { code: "PL", name: "Polish" },
+  { code: "PT", name: "Portuguese" },
+  { code: "PT-BR", name: "Portuguese (Brazilian)" },
+  { code: "PT-PT", name: "Portuguese (European)" },
+  { code: "RO", name: "Romanian" },
+  { code: "RU", name: "Russian" },
+  { code: "SK", name: "Slovak" },
+  { code: "SL", name: "Slovenian" },
+  { code: "SV", name: "Swedish" },
+  { code: "TR", name: "Turkish" },
+  { code: "ZH", name: "Chinese (simplified)" },
+]
+
 function apiUrlFor(endpoint: Endpoint): string {
   const baseUrl = getPreferenceValues().plan == "free"
     ? "https://api-free.deepl.com/v2/"

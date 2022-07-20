@@ -1,10 +1,10 @@
 import { List } from "@raycast/api";
-import { Language, useTranslation } from "./lib/deeplapi";
+import { Language, languages, useTranslation } from "./lib/deeplapi";
 import { TranslationListItem } from "./components/translation-list-item";
 
-export default function command(target: Language): () => JSX.Element {
+export default function command(targetLanguage: Language): () => JSX.Element {
   return (): JSX.Element => {
-    const { state, translation } = useTranslation(target);
+    const { state, translation } = useTranslation(targetLanguage);
 
     // TODO: Only show usage when on Free plan
     // TODO: Only show formality when on Pro plan
@@ -21,14 +21,22 @@ export default function command(target: Language): () => JSX.Element {
       subtitle = "";
     }
 
+    const languageCode: string = state.result?.translation?.detected_source_language as string;
+    const sourceLanguage = languageCode
+      ? languages.find((language: Language) => language.code == languageCode)
+      : null;
+    const title = sourceLanguage
+      ? `Translated from ${sourceLanguage?.name}:`
+      : "Translation:"
+
     return (
       <List
         isLoading={state.isLoading}
         onSearchTextChange={translation}
-        searchBarPlaceholder={`Translate to ${target.name} using DeepL…`}
+        searchBarPlaceholder={`Translate to ${targetLanguage.name} using DeepL…`}
         throttle
       >
-        <List.Section title={`Translated from ${state.result?.translation.detected_source_language}`} subtitle={subtitle}>
+        <List.Section title={title} subtitle={subtitle}>
           <TranslationListItem result={state.result}/>
         </List.Section>
       </List>
