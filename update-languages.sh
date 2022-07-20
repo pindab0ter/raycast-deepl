@@ -20,7 +20,7 @@ mv "$tmp" package.json
 
 jq -r 'map([.name, (.language | ascii_downcase)] | @tsv) | .[]' < <(echo "$response") |
   while IFS=$'\t' read -r name code; do
-    echo "import command from \"./create-language\";
+    echo "import command from \"./command\";
 
 export default command({ name: \"$name\", code: \"$code\" });" >"src/$code.tsx"
   done

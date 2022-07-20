@@ -6,9 +6,9 @@ export default function command(target: Language): () => JSX.Element {
   return (): JSX.Element => {
     const { state, translation } = useTranslation(target);
 
-    const usage = state.result?.usage
-
     // TODO: Only show usage when on Free plan
+    // TODO: Only show formality when on Pro plan
+    const usage = state.result?.usage
     let subtitle: string;
     if (usage != null) {
       const usagePercentage = Number(usage.character_count / usage.character_limit)
@@ -16,20 +16,20 @@ export default function command(target: Language): () => JSX.Element {
           style: "percent",
           maximumFractionDigits: 2
         })
-      subtitle = `${ usage.character_count }/${ usage.character_limit } characters used (${ usagePercentage })`;
+      subtitle = `${usage.character_count}/${usage.character_limit} characters used (${usagePercentage})`;
     } else {
       subtitle = "";
     }
 
     return (
       <List
-        isLoading={ state.isLoading }
-        onSearchTextChange={ translation }
-        searchBarPlaceholder="Translate to Dutch using DeepL…"
+        isLoading={state.isLoading}
+        onSearchTextChange={translation}
+        searchBarPlaceholder={`Translate to ${target.name} using DeepL…`}
         throttle
       >
-        <List.Section title={ `Translated from ${ target.name }` } subtitle={ subtitle }>
-          <TranslationListItem result={ state.result }/>
+        <List.Section title={`Translated from ${state.result?.translation.detected_source_language}`} subtitle={subtitle}>
+          <TranslationListItem result={state.result}/>
         </List.Section>
       </List>
     );
