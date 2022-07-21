@@ -6,7 +6,6 @@ export default function TranslateFromDetectedLanguage(props: { targetLanguage: L
   const { state, performTranslation } = useTranslation(props.targetLanguage);
 
   // TODO: Show dropdown of languages to translate from, defaulting to autodetected language
-  // TODO: Only show usage when on Free plan
   // TODO: Only show formality when on Pro plan
 
   return (

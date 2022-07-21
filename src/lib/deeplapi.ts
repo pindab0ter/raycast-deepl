@@ -89,7 +89,6 @@ async function getTranslation(
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  // TODO: Support multiple results
   return json.translations[0];
 }
 
