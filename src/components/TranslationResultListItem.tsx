@@ -3,7 +3,7 @@ import { TranslationState } from "../lib/deeplapi";
 
 export default function TranslationResultListItem({ state }: { state: TranslationState }) {
   if (state.translation == null) {
-    return null
+    return null;
   }
 
   return (

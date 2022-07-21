@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import fetch, { AbortError, FormData } from "node-fetch";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-export function useTranslation(target: Language): { state: TranslationState, performTranslation: (text: string) => Promise<void> } {
+export function useTranslation(target: Language): {
+  state: TranslationState;
+  performTranslation: (text: string) => Promise<void>;
+} {
   const [state, setState] = useState<TranslationState>({ translation: null, usage: null, isLoading: true });
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -17,15 +20,19 @@ export function useTranslation(target: Language): { state: TranslationState, per
       }));
 
       try {
-        const translation = (text.length > 0) ? await getTranslation(text, target, abortControllerRef.current.signal) : null;
-        const usage = translation != null ? await getUsage(abortControllerRef.current.signal) : null;
+        const translation = text.length > 0
+          ? await getTranslation(text, target, abortControllerRef.current.signal)
+          : null;
+
+        const usage = translation != null
+          ? await getUsage(abortControllerRef.current.signal)
+          : null;
 
         setState(() => ({
           translation,
           usage,
           isLoading: false,
         }));
-
       } catch (error) {
         setState((oldState: TranslationState) => ({
           ...oldState,
@@ -40,16 +47,15 @@ export function useTranslation(target: Language): { state: TranslationState, per
         showToast({
           style: Toast.Style.Failure,
           title: "Could not perform translation",
-          message: String(error)
+          message: String(error),
         }).then();
-
       }
     },
     [abortControllerRef, setState]
   );
 
   useEffect(() => {
-    performTranslation("");
+    performTranslation("").then();
     return () => {
       abortControllerRef.current?.abort();
     };
@@ -74,10 +80,10 @@ async function getTranslation(
   const response = await fetch(apiUrlFor("translate"), {
     method: "post",
     signal: signal,
-    body: formData
+    body: formData,
   });
 
-  const json = await response.json() as | TranslationResponse | ErrorResponse;
+  const json = (await response.json()) as TranslationResponse | ErrorResponse;
 
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
@@ -99,14 +105,12 @@ export async function getUsage(
   const response = await fetch(apiUrlFor("usage"), {
     method: "post",
     signal: signal,
-    body: formData
+    body: formData,
   });
 
-  const json = await response.json() as Usage | ErrorResponse;
+  const json = (await response.json()) as Usage | ErrorResponse;
 
-  return !response.ok || "message" in json
-    ? null
-    : json;
+  return (!response.ok || "message" in json) ? null : json;
 }
 
 export const languages = [
@@ -140,7 +144,7 @@ export const languages = [
   { code: "SV", name: "Swedish" },
   { code: "TR", name: "Turkish" },
   { code: "ZH", name: "Chinese (simplified)" },
-]
+];
 
 function apiUrlFor(endpoint: Endpoint): string {
   const baseUrl = getPreferenceValues().plan == "free"
@@ -153,30 +157,30 @@ function apiUrlFor(endpoint: Endpoint): string {
 type Endpoint = "translate" | "usage" | "languages";
 
 export type Language = {
-  name: string,
-  code: string
-}
+  name: string;
+  code: string;
+};
 
 export type TranslationResponse = {
-  translations: Translation[]
-}
+  translations: Translation[];
+};
 
 export type ErrorResponse = {
-  message: string
-}
+  message: string;
+};
 
 export type TranslationState = {
   translation: Translation | null;
   usage: Usage | null;
   isLoading: boolean;
-}
+};
 
 export type Translation = {
-  text: string,
-  detected_source_language: string,
-}
+  text: string;
+  detected_source_language: string;
+};
 
 export type Usage = {
-  character_count: number,
-  character_limit: number
-}
+  character_count: number;
+  character_limit: number;
+};

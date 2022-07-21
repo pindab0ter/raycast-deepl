@@ -11,11 +11,13 @@ export default function TranslateFromDetectedLanguage(props: { targetLanguage: L
   let subtitle: string;
 
   if (state.usage != null) {
-    const usagePercentage = Number(state.usage.character_count / state.usage.character_limit)
-      .toLocaleString(undefined, {
+    const usagePercentage = Number(state.usage.character_count / state.usage.character_limit).toLocaleString(
+      undefined,
+      {
         style: "percent",
-        maximumFractionDigits: 2
-      })
+        maximumFractionDigits: 2,
+      }
+    );
     subtitle = `${state.usage.character_count}/${state.usage.character_limit} characters used (${usagePercentage})`;
   } else {
     subtitle = "";
@@ -37,7 +39,7 @@ export default function TranslateFromDetectedLanguage(props: { targetLanguage: L
       throttle
     >
       <List.Section title={title} subtitle={subtitle}>
-        <TranslationResultListItem state={state}/>
+        <TranslationResultListItem state={state} />
       </List.Section>
     </List>
   );
