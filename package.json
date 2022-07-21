@@ -46,8 +46,15 @@
       "mode": "view"
     },
     {
-      "name": "en",
-      "title": "Translate to English",
+      "name": "en-gb",
+      "title": "Translate to British English",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to English.",
+      "mode": "view"
+    },
+    {
+      "name": "en-us",
+      "title": "Translate to American English",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to English.",
       "mode": "view"
@@ -137,8 +144,15 @@
       "mode": "view"
     },
     {
-      "name": "pt",
+      "name": "pt-pt",
       "title": "Translate to Portuguese",
+      "subtitle": "DeepL",
+      "description": "Translate from an auto detected language to Portuguese.",
+      "mode": "view"
+    },
+    {
+      "name": "pt-br",
+      "title": "Translate to Brazilian Portuguese",
       "subtitle": "DeepL",
       "description": "Translate from an auto detected language to Portuguese.",
       "mode": "view"
