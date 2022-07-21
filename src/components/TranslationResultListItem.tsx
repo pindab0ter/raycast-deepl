@@ -1,22 +1,27 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, useNavigation } from "@raycast/api";
 import { TranslationState } from "../lib/deeplapi";
+import TranslationResultDetail from "./TranslationResultDetail";
 
 export default function TranslationResultListItem({ state }: { state: TranslationState }) {
   if (state.translation == null) {
     return null;
   }
 
+  const { push } = useNavigation();
+
   return (
     <List.Item
       title={state.translation.text}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Translated Text"
-              content={state.translation?.text}
-            />
-          </ActionPanel.Section>
+          <Action
+            title="View"
+            onAction={() => push(<TranslationResultDetail state={state} />)}
+          />
+          <Action.CopyToClipboard
+            title="Copy Translated Text"
+            content={state.translation?.text}
+          />
         </ActionPanel>
       }
     />

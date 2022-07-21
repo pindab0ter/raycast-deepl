@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { Language, languages, Translation, Usage, useTranslation } from "../lib/deeplapi";
 import TranslationResultListItem from "./TranslationResultListItem";
 
@@ -47,12 +47,14 @@ function generateSubtitle(usage: Usage | null): string {
     return "";
   }
 
-  const usagePercentage = Number(usage.character_count / usage.character_limit).toLocaleString(
-    undefined,
-    {
-      style: "percent",
-      maximumFractionDigits: 2,
-    }
-  );
-  return `${usage.character_count}/${usage.character_limit} characters used (${usagePercentage})`;
+  const usagePercentage = (usage.character_count / usage.character_limit).toLocaleString(undefined, {
+    style: "percent",
+    maximumFractionDigits: 2,
+  });
+
+  const characterCount = usage.character_count.toLocaleString();
+  const characterLimit = usage.character_limit.toLocaleString();
+  const plan = getPreferenceValues().plan == "free" ? "DeepL API Free" : "DeepL API Pro";
+
+  return `${usagePercentage} of ${plan} plan used this period (${characterCount} / ${characterLimit} characters)`;
 }
