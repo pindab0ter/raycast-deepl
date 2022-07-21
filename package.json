@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepl",
   "title": "DeepL",
-  "description": "Get translations using DeepL",
+  "description": "Translate text using the DeepL API.",
   "icon": "command-icon.png",
   "author": "pindab0ter",
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
@@ -212,16 +213,16 @@
       "name": "plan",
       "type": "dropdown",
       "title": "Subscription Plan",
-      "description": "Whether you are on a paid plan or not.",
+      "description": "Specify what DeepL Plan are you on.",
       "required": true,
       "default": "free",
       "data": [
         {
-          "title": "Free",
+          "title": "DeepL API Free",
           "value": "free"
         },
         {
-          "title": "Pro",
+          "title": "DeepL API Pro",
           "value": "pro"
         }
       ]
@@ -229,10 +230,11 @@
     {
       "name": "apikey",
       "type": "password",
-      "title": "API Key",
       "required": true,
-      "placeholder": "Your DeepL API key",
-      "description": "DeepL API key. Find this in your account details."
+      "title": "API Key",
+      "description": "Your DeepL API key. Find this in your account details.",
+      "link": "https://www.deepl.com/account/summary",
+      "placeholder": "Enter you DeepL API key"
     }
   ],
   "dependencies": {
