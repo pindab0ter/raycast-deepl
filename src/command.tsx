@@ -1,6 +1,6 @@
 import { Language } from "./lib/deeplapi";
-import TranslateFromDetectedLanguage from "./components/TranslateFromDetectedLanguage";
+import TranslationResultList from "./components/TranslationResultList";
 
 export default function command(targetLanguage: Language): () => JSX.Element {
-  return () => <TranslateFromDetectedLanguage targetLanguage={targetLanguage} />;
+  return () => <TranslationResultList targetLanguage={targetLanguage} />;
 }

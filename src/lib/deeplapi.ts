@@ -2,46 +2,53 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import fetch, { AbortError, FormData } from "node-fetch";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-export function useTranslation(target: Language): {
+export function setUpTranslation(targetLanguage: Language): {
+  setText: (text: string) => Promise<void>;
   state: TranslationState;
-  performTranslation: (text: string) => Promise<void>;
+  setSourceLanguage: (sourceLanguage: (Language | null)) => void
 } {
-  const [state, setState] = useState<TranslationState>({ translation: null, usage: null, isLoading: true });
+  const [state, setState] = useState<TranslationState>({
+    text: "",
+    translation: null,
+    sourceLanguage: null,
+    usage: null,
+    isLoading: true
+  });
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const performTranslation = useCallback(
-    async function translate(text: string) {
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
+  const setSourceLanguage = useCallback(
+    (sourceLanguage: Language | null): void => {
+      setState((oldState: TranslationState) => ({ ...oldState, sourceLanguage }));
+    },
+    [setState]
+  );
 
-      setState((oldState: TranslationState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
+  const setText = useCallback(
+    async function translate(text: string): Promise<void> {
+      setState((oldState: TranslationState) => ({ ...oldState, text: text }));
+    }, [abortControllerRef, setState]);
 
+  useEffect(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+
+    setState((oldState: TranslationState) => ({ ...oldState, isLoading: true }));
+
+    async function performTranslation(): Promise<void> {
       try {
-        const translation = text.length > 0
-          ? await getTranslation(text, target, abortControllerRef.current.signal)
+        const translation = state.text.length > 0
+          ? await getTranslation(state.text, state.sourceLanguage, targetLanguage, abortControllerRef.current?.signal ?? null)
           : null;
 
         const usage = translation != null
-          ? await getUsage(abortControllerRef.current.signal)
+          ? await getUsage(abortControllerRef.current?.signal ?? null)
           : null;
 
-        setState(() => ({
-          translation,
-          usage,
-          isLoading: false,
-        }));
+        setState((oldState: TranslationState) => ({ ...oldState, translation, usage, isLoading: false }));
       } catch (error) {
-        setState((oldState: TranslationState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
+        setState((oldState: TranslationState) => ({ ...oldState, isLoading: false }));
 
-        if (error instanceof AbortError) {
-          return;
-        }
+        if (error instanceof AbortError) return;
 
         console.error("Translation error", error);
         showToast({
@@ -50,32 +57,29 @@ export function useTranslation(target: Language): {
           message: String(error),
         }).then();
       }
-    },
-    [abortControllerRef, setState]
-  );
+    }
 
-  useEffect(() => {
-    performTranslation("").then();
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
+    performTranslation().then();
+  }, [state.text, state.sourceLanguage]);
 
-  return { state, performTranslation };
+  return { state, setSourceLanguage, setText };
 }
 
 async function getTranslation(
   text: string,
-  target: Language,
-  signal: AbortSignal
+  sourceLanguage: Language | null,
+  targetLanguage: Language,
+  signal: AbortSignal | null,
 ): Promise<Translation> {
-  console.log("getTranslation", text, target);
   const preferences = getPreferenceValues();
 
   const formData = new FormData();
   formData.append("auth_key", preferences.apikey);
   formData.append("text", text);
-  formData.append("target_lang", target.code);
+  if (sourceLanguage != null) {
+    formData.append("source_lang", sourceLanguage.code);
+  }
+  formData.append("target_lang", targetLanguage.code);
 
   const response = await fetch(apiUrlFor("translate"), {
     method: "post",
@@ -89,11 +93,12 @@ async function getTranslation(
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
+  // We only ever send one query to the API, so only one result is ever returned.
   return json.translations[0];
 }
 
 export async function getUsage(
-  signal: AbortSignal
+  signal: AbortSignal | null
 ): Promise<Usage | null> {
   const preferences = getPreferenceValues();
 
@@ -112,15 +117,13 @@ export async function getUsage(
   return (!response.ok || "message" in json) ? null : json;
 }
 
-export const languages = [
+export const sourceLanguages: Language[] = [
   { code: "BG", name: "Bulgarian" },
   { code: "CS", name: "Czech" },
   { code: "DA", name: "Danish" },
   { code: "DE", name: "German" },
   { code: "EL", name: "Greek" },
   { code: "EN", name: "English" },
-  { code: "EN-GB", name: "English (British)" },
-  { code: "EN-US", name: "English (American)" },
   { code: "ES", name: "Spanish" },
   { code: "ET", name: "Estonian" },
   { code: "FI", name: "Finnish" },
@@ -134,8 +137,6 @@ export const languages = [
   { code: "NL", name: "Dutch" },
   { code: "PL", name: "Polish" },
   { code: "PT", name: "Portuguese" },
-  { code: "PT-BR", name: "Portuguese (Brazilian)" },
-  { code: "PT-PT", name: "Portuguese (European)" },
   { code: "RO", name: "Romanian" },
   { code: "RU", name: "Russian" },
   { code: "SK", name: "Slovak" },
@@ -156,8 +157,8 @@ function apiUrlFor(endpoint: Endpoint): string {
 type Endpoint = "translate" | "usage" | "languages";
 
 export type Language = {
-  name: string;
   code: string;
+  name: string;
 };
 
 export type TranslationResponse = {
@@ -169,7 +170,9 @@ export type ErrorResponse = {
 };
 
 export type TranslationState = {
+  text: string;
   translation: Translation | null;
+  sourceLanguage: Language | null;
   usage: Usage | null;
   isLoading: boolean;
 };
