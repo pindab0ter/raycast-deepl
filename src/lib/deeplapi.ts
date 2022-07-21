@@ -2,27 +2,32 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import fetch, { AbortError, FormData } from "node-fetch";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-export function useTranslation(target: Language) {
-  const [state, setState] = useState<TranslationState>({ result: null, isLoading: true });
+export function useTranslation(target: Language): { state: TranslationState, performTranslation: (text: string) => Promise<void> } {
+  const [state, setState] = useState<TranslationState>({ translation: null, usage: null, isLoading: true });
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const translation = useCallback(
+  const performTranslation = useCallback(
     async function translate(text: string) {
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
-      setState((oldState) => ({
+
+      setState((oldState: TranslationState) => ({
         ...oldState,
         isLoading: true,
       }));
+
       try {
-        const result = await performTranslation(text, target, abortControllerRef.current.signal);
-        setState((oldState) => ({
-          ...oldState,
-          result: result,
+        const translation = (text.length > 0) ? await getTranslation(text, target, abortControllerRef.current.signal) : null;
+        const usage = translation != null ? await getUsage(abortControllerRef.current.signal) : null;
+
+        setState(() => ({
+          translation,
+          usage,
           isLoading: false,
         }));
+
       } catch (error) {
-        setState((oldState) => ({
+        setState((oldState: TranslationState) => ({
           ...oldState,
           isLoading: false,
         }));
@@ -31,38 +36,34 @@ export function useTranslation(target: Language) {
           return;
         }
 
-        console.error("translation error", error);
+        console.error("Translation error", error);
         showToast({
           style: Toast.Style.Failure,
           title: "Could not perform translation",
           message: String(error)
         }).then();
+
       }
     },
     [abortControllerRef, setState]
   );
 
   useEffect(() => {
-    translation("").then();
+    performTranslation("");
     return () => {
       abortControllerRef.current?.abort();
     };
   }, []);
 
-  return {
-    state: state,
-    translation: translation,
-  };
+  return { state, performTranslation };
 }
 
-async function performTranslation(
+async function getTranslation(
   text: string,
   target: Language,
   signal: AbortSignal
-): Promise<{ translation: Translation; usage: Usage | null } | null> {
-
-  if (text.length === 0) return null;
-
+): Promise<Translation> {
+  console.log("getTranslation", text, target);
   const preferences = getPreferenceValues();
 
   const formData = new FormData();
@@ -76,26 +77,19 @@ async function performTranslation(
     body: formData
   });
 
-  const json = await response.json() as
-    | {
-        translations: Translation[];
-      }
-    | { message: string };
+  const json = await response.json() as | TranslationResponse | ErrorResponse;
 
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  const translation = json.translations[0];
-  const usage = await getUsage(signal);
-
-  return {
-    translation: translation,
-    usage: usage
-  };
+  // TODO: Support multiple results
+  return json.translations[0];
 }
 
-export async function getUsage(signal: AbortSignal | null = null): Promise<Usage | null> {
+export async function getUsage(
+  signal: AbortSignal
+): Promise<Usage | null> {
   const preferences = getPreferenceValues();
 
   const formData = new FormData();
@@ -163,21 +157,26 @@ export type Language = {
   code: string
 }
 
+export type TranslationResponse = {
+  translations: Translation[]
+}
+
 export type ErrorResponse = {
   message: string
 }
 
 export type TranslationState = {
-  result: { translation: Translation, usage: Usage | null } | null;
+  translation: Translation | null;
+  usage: Usage | null;
   isLoading: boolean;
-}
-
-export type Usage = {
-  character_count: number,
-  character_limit: number
 }
 
 export type Translation = {
   text: string,
   detected_source_language: string,
+}
+
+export type Usage = {
+  character_count: number,
+  character_limit: number
 }

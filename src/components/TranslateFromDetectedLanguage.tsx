@@ -1,27 +1,27 @@
 import { List } from "@raycast/api";
 import { Language, languages, useTranslation } from "../lib/deeplapi";
-import { TranslationResultListItem } from "./TranslationResultListItem";
+import TranslationResultListItem from "./TranslationResultListItem";
 
-export default function TranslateFromDetectedLanguage(targetLanguage: Language) {
-  const { state, translation } = useTranslation(targetLanguage);
+export default function TranslateFromDetectedLanguage(props: { targetLanguage: Language }) {
+  const { state, performTranslation } = useTranslation(props.targetLanguage);
 
   // TODO: Show dropdown of languages to translate from, defaulting to autodetected language
   // TODO: Only show usage when on Free plan
   // TODO: Only show formality when on Pro plan
-  const usage = state.result?.usage
   let subtitle: string;
-  if (usage != null) {
-    const usagePercentage = Number(usage.character_count / usage.character_limit)
+
+  if (state.usage != null) {
+    const usagePercentage = Number(state.usage.character_count / state.usage.character_limit)
       .toLocaleString(undefined, {
         style: "percent",
         maximumFractionDigits: 2
       })
-    subtitle = `${usage.character_count}/${usage.character_limit} characters used (${usagePercentage})`;
+    subtitle = `${state.usage.character_count}/${state.usage.character_limit} characters used (${usagePercentage})`;
   } else {
     subtitle = "";
   }
 
-  const languageCode: string = state.result?.translation?.detected_source_language as string;
+  const languageCode: string = state.translation?.detected_source_language ?? "";
   const sourceLanguage = languageCode
     ? languages.find((language: Language) => language.code == languageCode)
     : null;
@@ -32,12 +32,12 @@ export default function TranslateFromDetectedLanguage(targetLanguage: Language) 
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={translation}
-      searchBarPlaceholder={`Translate to ${targetLanguage.name} using DeepL…`}
+      onSearchTextChange={performTranslation}
+      searchBarPlaceholder={`Translate to ${props.targetLanguage.name} using DeepL…`}
       throttle
     >
       <List.Section title={title} subtitle={subtitle}>
-        <TranslationResultListItem result={state.result}/>
+        <TranslationResultListItem state={state}/>
       </List.Section>
     </List>
   );
