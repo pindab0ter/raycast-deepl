@@ -14,14 +14,8 @@ export default function TranslationResultListItem({ state }: { state: Translatio
       title={state.translation.text}
       actions={
         <ActionPanel>
-          <Action
-            title="View"
-            onAction={() => push(<TranslationResultDetail state={state} />)}
-          />
-          <Action.CopyToClipboard
-            title="Copy Translated Text"
-            content={state.translation?.text}
-          />
+          <Action title="View" onAction={() => push(<TranslationResultDetail state={state} />)} />
+          <Action.CopyToClipboard title="Copy Translated Text" content={state.translation?.text} />
         </ActionPanel>
       }
     />

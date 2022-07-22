@@ -5,14 +5,14 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 export function setUpTranslation(targetLanguage: Language): {
   setText: (text: string) => Promise<void>;
   state: TranslationState;
-  setSourceLanguage: (sourceLanguage: (Language | null)) => void
+  setSourceLanguage: (sourceLanguage: Language | null) => void;
 } {
   const [state, setState] = useState<TranslationState>({
     text: "",
     translation: null,
     sourceLanguage: null,
     usage: null,
-    isLoading: true
+    isLoading: true,
   });
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -26,7 +26,9 @@ export function setUpTranslation(targetLanguage: Language): {
   const setText = useCallback(
     async function translate(text: string): Promise<void> {
       setState((oldState: TranslationState) => ({ ...oldState, text: text }));
-    }, [abortControllerRef, setState]);
+    },
+    [abortControllerRef, setState]
+  );
 
   useEffect(() => {
     abortControllerRef.current?.abort();
@@ -36,13 +38,17 @@ export function setUpTranslation(targetLanguage: Language): {
 
     async function performTranslation(): Promise<void> {
       try {
-        const translation = state.text.length > 0
-          ? await getTranslation(state.text, state.sourceLanguage, targetLanguage, abortControllerRef.current?.signal ?? null)
-          : null;
+        const translation =
+          state.text.length > 0
+            ? await getTranslation(
+              state.text,
+              state.sourceLanguage,
+              targetLanguage,
+              abortControllerRef.current?.signal ?? null
+            )
+            : null;
 
-        const usage = translation != null
-          ? await getUsage(abortControllerRef.current?.signal ?? null)
-          : null;
+        const usage = translation != null ? await getUsage(abortControllerRef.current?.signal ?? null) : null;
 
         setState((oldState: TranslationState) => ({ ...oldState, translation, usage, isLoading: false }));
       } catch (error) {
@@ -69,7 +75,7 @@ async function getTranslation(
   text: string,
   sourceLanguage: Language | null,
   targetLanguage: Language,
-  signal: AbortSignal | null,
+  signal: AbortSignal | null
 ): Promise<Translation> {
   const preferences = getPreferenceValues();
 
@@ -97,9 +103,7 @@ async function getTranslation(
   return json.translations[0];
 }
 
-export async function getUsage(
-  signal: AbortSignal | null
-): Promise<Usage | null> {
+export async function getUsage(signal: AbortSignal | null): Promise<Usage | null> {
   const preferences = getPreferenceValues();
 
   const formData = new FormData();
@@ -114,42 +118,40 @@ export async function getUsage(
 
   const json = (await response.json()) as Usage | ErrorResponse;
 
-  return (!response.ok || "message" in json) ? null : json;
+  return !response.ok || "message" in json ? null : json;
 }
 
 export const sourceLanguages: Language[] = [
-  { name: "🇧🇬 Bulgarian", code: "BG", },
-  { name: "🇨🇳 Chinese (simplified)", code: "ZH", },
-  { name: "🇨🇿 Czech", code: "CS", },
-  { name: "🇩🇰 Danish", code: "DA", },
-  { name: "🇳🇱 Dutch", code: "NL", },
-  { name: "🇬🇧 English", code: "EN", },
-  { name: "🇪🇪 Estonian", code: "ET", },
-  { name: "🇫🇮 Finnish", code: "FI", },
-  { name: "🇫🇷 French", code: "FR", },
-  { name: "🇩🇪 German", code: "DE", },
-  { name: "🇬🇷 Greek", code: "EL", },
-  { name: "🇭🇺 Hungarian", code: "HU", },
-  { name: "🇮🇩 Indonesian", code: "ID", },
-  { name: "🇮🇹 Italian", code: "IT", },
-  { name: "🇯🇵 Japanese", code: "JA", },
-  { name: "🇱🇻 Latvian", code: "LV", },
-  { name: "🇱🇹 Lithuanian", code: "LT", },
-  { name: "🇵🇱 Polish", code: "PL", },
-  { name: "🇵🇹 Portuguese", code: "PT", },
-  { name: "🇷🇴 Romanian", code: "RO", },
-  { name: "🇷🇺 Russian", code: "RU", },
-  { name: "🇸🇰 Slovak", code: "SK", },
-  { name: "🇸🇮 Slovenian", code: "SL", },
-  { name: "🇪🇸 Spanish", code: "ES", },
-  { name: "🇸🇪 Swedish", code: "SV", },
-  { name: "🇹🇷 Turkish", code: "TR", },
+  { name: "🇧🇬 Bulgarian", code: "BG" },
+  { name: "🇨🇳 Chinese (simplified)", code: "ZH" },
+  { name: "🇨🇿 Czech", code: "CS" },
+  { name: "🇩🇰 Danish", code: "DA" },
+  { name: "🇳🇱 Dutch", code: "NL" },
+  { name: "🇬🇧 English", code: "EN" },
+  { name: "🇪🇪 Estonian", code: "ET" },
+  { name: "🇫🇮 Finnish", code: "FI" },
+  { name: "🇫🇷 French", code: "FR" },
+  { name: "🇩🇪 German", code: "DE" },
+  { name: "🇬🇷 Greek", code: "EL" },
+  { name: "🇭🇺 Hungarian", code: "HU" },
+  { name: "🇮🇩 Indonesian", code: "ID" },
+  { name: "🇮🇹 Italian", code: "IT" },
+  { name: "🇯🇵 Japanese", code: "JA" },
+  { name: "🇱🇻 Latvian", code: "LV" },
+  { name: "🇱🇹 Lithuanian", code: "LT" },
+  { name: "🇵🇱 Polish", code: "PL" },
+  { name: "🇵🇹 Portuguese", code: "PT" },
+  { name: "🇷🇴 Romanian", code: "RO" },
+  { name: "🇷🇺 Russian", code: "RU" },
+  { name: "🇸🇰 Slovak", code: "SK" },
+  { name: "🇸🇮 Slovenian", code: "SL" },
+  { name: "🇪🇸 Spanish", code: "ES" },
+  { name: "🇸🇪 Swedish", code: "SV" },
+  { name: "🇹🇷 Turkish", code: "TR" },
 ];
 
 function apiUrlFor(endpoint: Endpoint): string {
-  const baseUrl = getPreferenceValues().plan == "free"
-    ? "https://api-free.deepl.com/v2/"
-    : "https://api.deepl.com/v2/";
+  const baseUrl = getPreferenceValues().plan == "free" ? "https://api-free.deepl.com/v2/" : "https://api.deepl.com/v2/";
 
   return baseUrl + endpoint;
 }

@@ -9,25 +9,21 @@ export default function TranslationResultList(props: { targetLanguage: Language 
     setSourceLanguage(newValue);
   };
 
-  return <List
-    isLoading={state.isLoading}
-    onSearchTextChange={setText}
-    searchBarPlaceholder={`Translate to ${props.targetLanguage.name} using DeepL…`}
-    searchBarAccessory={
-      <SourceLanguageDropdown
-        sourceLanguages={sourceLanguages}
-        onSourceLanguageChange={onSourceLanguageChange}
-      />
-    }
-    throttle
-  >
-    <List.Section
-      title={generateTitle(state)}
-      subtitle={generateSubtitle(state.usage)}
+  return (
+    <List
+      isLoading={state.isLoading}
+      onSearchTextChange={setText}
+      searchBarPlaceholder={`Translate to ${props.targetLanguage.name} using DeepL…`}
+      searchBarAccessory={
+        <SourceLanguageDropdown sourceLanguages={sourceLanguages} onSourceLanguageChange={onSourceLanguageChange} />
+      }
+      throttle
     >
-      <TranslationResultListItem state={state} />
-    </List.Section>
-  </List>
+      <List.Section title={generateTitle(state)} subtitle={generateSubtitle(state.usage)}>
+        <TranslationResultListItem state={state} />
+      </List.Section>
+    </List>
+  );
 }
 
 function generateTitle(state: TranslationState): string {
@@ -35,9 +31,11 @@ function generateTitle(state: TranslationState): string {
     return "Translation:";
   }
 
-  const sourceLanguage = state.sourceLanguage ?? sourceLanguages.find(function (language: Language) {
-    return language.code == state.translation?.detected_source_language;
-  });
+  const sourceLanguage =
+    state.sourceLanguage ??
+    sourceLanguages.find(function (language: Language) {
+      return language.code == state.translation?.detected_source_language;
+    });
 
   if (sourceLanguage == null) {
     return "Translation:";
@@ -65,29 +63,23 @@ function generateSubtitle(usage: Usage | null): string {
 
 function SourceLanguageDropdown(props: {
   sourceLanguages: Language[];
-  onSourceLanguageChange: (newValue: Language | null) => void
+  onSourceLanguageChange: (newValue: Language | null) => void;
 }) {
   const { sourceLanguages, onSourceLanguageChange } = props;
 
-  return <List.Dropdown
-    tooltip="Select Source Language"
-    onChange={(newValue) => {
-      onSourceLanguageChange(sourceLanguages.find((language: Language) => language.code == newValue) as Language);
-    }}
-  >
-    <List.Dropdown.Section title="Source Language">
-      <List.Dropdown.Item
-        key="AUTODETECT"
-        title="Autodetect"
-        value="AUTODETECT"
-      />
-      {sourceLanguages.map((language) => (
-        <List.Dropdown.Item
-          key={language.code}
-          title={language.name}
-          value={`${language.code}`}
-        />
-      ))}
-    </List.Dropdown.Section>
-  </List.Dropdown>
+  return (
+    <List.Dropdown
+      tooltip="Select Source Language"
+      onChange={(newValue) => {
+        onSourceLanguageChange(sourceLanguages.find((language: Language) => language.code == newValue) as Language);
+      }}
+    >
+      <List.Dropdown.Section title="Source Language">
+        <List.Dropdown.Item key="AUTODETECT" title="Autodetect" value="AUTODETECT" />
+        {sourceLanguages.map((language) => (
+          <List.Dropdown.Item key={language.code} title={language.name} value={`${language.code}`} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
 }
