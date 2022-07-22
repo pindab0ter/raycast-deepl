@@ -159,8 +159,8 @@ function apiUrlFor(endpoint: Endpoint): string {
 type Endpoint = "translate" | "usage" | "languages";
 
 export type Language = {
-  code: string;
   name: string;
+  code: string;
 };
 
 export type TranslationResponse = {
