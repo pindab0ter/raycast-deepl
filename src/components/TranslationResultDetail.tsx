@@ -1,16 +1,22 @@
 import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import { Translation, Usage } from "../deepl-api";
 
-export default function TranslationResultDetail(props: { translation: Translation; usage: Usage | undefined }) {
+export default function TranslationResultDetail({
+  translation,
+  usage,
+}: {
+  translation: Translation;
+  usage: Usage | undefined;
+}) {
   return (
     <Detail
-      markdown={`${props.translation?.text}`}
+      markdown={`${translation?.text}`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Translated Text" content={props.translation?.text ?? ""} />
+          <Action.CopyToClipboard title="Copy Translated Text" content={translation?.text ?? ""} />
         </ActionPanel>
       }
-      metadata={metadata(props.translation, props.usage)}
+      metadata={metadata(translation, usage)}
     />
   );
 }

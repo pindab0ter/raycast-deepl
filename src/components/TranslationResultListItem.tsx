@@ -2,23 +2,29 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List, useNavigation } f
 import { Translation, Usage } from "../deepl-api";
 import TranslationResultDetail from "./TranslationResultDetail";
 
-export default function TranslationResultListItem(props: { translation: Translation; usage: Usage | undefined }) {
+export default function TranslationResultListItem({
+  translation,
+  usage,
+}: {
+  translation: Translation;
+  usage: Usage | undefined;
+}) {
   const { push } = useNavigation();
-  const title = `Translated from ${props.translation.detectedSourceLanguage.name}:`;
-  const subtitle = props.usage ? generateSubtitle(props.usage) : "";
+  const title = `Translated from ${translation.detectedSourceLanguage.name}:`;
+  const subtitle = usage ? generateSubtitle(usage) : "";
 
   return (
     <List.Section title={title} subtitle={subtitle}>
       <List.Item
-        title={props.translation.text}
+        title={translation.text}
         actions={
           <ActionPanel>
             <Action
               title="View Translation"
               icon={{ source: Icon.AppWindowSidebarRight }}
-              onAction={() => push(<TranslationResultDetail translation={props.translation} usage={props.usage} />)}
+              onAction={() => push(<TranslationResultDetail translation={translation} usage={usage} />)}
             />
-            <Action.CopyToClipboard title="Copy Translated Text" content={props.translation.text} />
+            <Action.CopyToClipboard title="Copy Translated Text" content={translation.text} />
           </ActionPanel>
         }
       />
