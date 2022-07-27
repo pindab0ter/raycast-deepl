@@ -228,7 +228,7 @@
       ]
     },
     {
-      "name": "apikey",
+      "name": "api_key",
       "type": "password",
       "required": true,
       "title": "API Key",
