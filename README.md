@@ -1,6 +1,6 @@
 <div align="center">
   <img
-    src="https://github.com/raycast/extensions/blob/main/extensions/deepl/assets/command-icon.png?raw=true"
+    src="https://github.com/pindab0ter/raycast-deepl/blob/main/assets/command-icon.png"
     width="50"
   />
   <h1>
