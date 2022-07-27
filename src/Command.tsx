@@ -27,7 +27,7 @@ export default function Command(targetLanguage: Language): () => JSX.Element {
         }
         throttle
       >
-        {!isLoading && hasTranslation && <TranslationResultListItem translation={translation} usage={usage} />}
+        {hasTranslation && <TranslationResultListItem translation={translation} usage={usage} />}
       </List>
     );
   };
