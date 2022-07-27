@@ -8,7 +8,11 @@ export default function Command(targetLanguage: Language): () => JSX.Element {
   return () => {
     const [searchText, setSearchText] = useState("");
     const [sourceLanguage, setSourceLanguage] = useState<Language | undefined>(undefined);
-    const { isLoading: isLoadingTranslation, data: translation } = useTranslation(searchText, sourceLanguage, targetLanguage);
+    const { isLoading: isLoadingTranslation, data: translation } = useTranslation(
+      searchText,
+      sourceLanguage,
+      targetLanguage
+    );
     const { isLoading: isLoadingUsage, data: usage, revalidate: revalidateUsage } = useUsage();
     const isLoading = isLoadingUsage || isLoadingTranslation;
     const hasInput = searchText.length > 0;
